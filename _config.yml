@@ -1,0 +1,34 @@
+contact: j.hetherington@ucl.ac.uk
+
+title: "Research Web of Prof James Hetherington"
+includeleftnav: True
+short: JHResearch
+
+defaults:
+  - scope: {path: ""}
+    values: {layout: default}
+
+remote_theme: UCL-ARC/indigo-jekyll
+
+crumbs:
+  - link: https://www.ucl.ac.uk/arc
+    text: Advanced Research Computing
+
+kramdown:
+  hard_wrap: false
+
+plugins:
+  - jekyll-remote-theme
+
+include: # NOTE: This is not a path, but the directories name, wherever they are
+  - _static
+  - _modules
+
+exclude:
+  - vendor/
+  - Gemfile
+  - Gemfile.lock
+  - "*/*.nbconvert.ipynb"
+  - "*/*.v2.ipynb"
+  - "combined_files"
+  - "combined.ipynb"
