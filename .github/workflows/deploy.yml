@@ -15,7 +15,7 @@ jobs:
           github-token: ${{ secrets.INFRA }} # Fine-grained GitHub PAT that was saved as repository secret
           script: |
             try {
-              const result = await github.rest.actions.createworkflowDispatch({
+              const result = await github.rest.actions.createWorkflowDispatch({
                 owner: 'jamespjh',
                 repo: 'jh-infrastructure',
                 workflow_id: 'deploy_web.yml',
