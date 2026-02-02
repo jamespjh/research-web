@@ -1,0 +1,62 @@
+---
+- name: Install yum packages
+  ansible.builtin.dnf:
+    name: "{{ packages }}"
+  become: true
+  vars:
+    packages:
+      - httpd
+      - mod_wsgi
+
+- name: Git clone the web content to the server
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/git_module.html
+  ansible.builtin.git:
+    repo: https://github.com/jamespjh/research-web.git
+    dest: builds/clone
+  register: clone
+
+- name: Copy from the clone to a folder named for the sha
+  # We are building up every deployment as separate folders, so we don't overwrite them
+  ansible.builtin.copy:
+    remote_src: true
+    src: builds/clone/
+    dest: builds/{{ clone.after }}
+
+- name: Build the site
+  # Need to make this idempotent
+  ansible.builtin.shell:
+    chdir: builds/{{ clone.after }}
+    cmd: |
+      eval "$(rbenv init - bash)"
+      rbenv install -s `cat .ruby-version`
+      gem install bundler
+      bundle install
+      bundle exec jekyll build
+
+- name: Repoint the symlink to the latest clone
+  ansible.builtin.file:
+    src: /home/almalinux/builds/{{ clone.after }}/_site
+    dest: /var/www/html/research
+    state: link
+  notify: Restart httpd
+  become: true
+
+- name: Set the perms on the home folder so the read is allowed
+  ansible.builtin.file:
+    path: /home/almalinux
+    mode: '755'
+
+- name: Tell SELinux that the linked folder is A-OK
+  ansible.builtin.command: chcon -R -t httpd_sys_content_t /var/www/html/research/
+  become: true
+
+- name: Set up the apache config
+  become: true
+  ansible.builtin.copy:
+    src: web.conf
+    dest: /etc/httpd/conf.d/web.conf
+  notify: Restart httpd
+
+
+
+

@@ -1,3 +1,4 @@
 Gemfile.lock
 _site/
 build/
+ansible/inventory_kubevirt.yml
