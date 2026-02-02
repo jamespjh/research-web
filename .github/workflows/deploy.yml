@@ -27,4 +27,24 @@ jobs:
               console.error(error);
               core.setFailed(error);
             }
-              
+      - name: Install test dependencies
+        run: |
+          cd deploy_tests
+          pip install virtualenv
+          python -m venv test_venv
+          source test_venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Test with pytest
+        run: |
+          cd deploy_tests
+          source test_venv/bin/activate
+          py.test test_web.py  --junitxml=junit/test-results.xml
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: deploy_tests/junit/test-results.xml
+          # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
+                
