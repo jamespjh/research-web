@@ -1,13 +1,4 @@
 ---
-- name: Install yum packages
-  ansible.builtin.dnf:
-    name: "{{ packages }}"
-  become: true
-  vars:
-    packages:
-      - httpd
-      - mod_wsgi
-
 - name: Git clone the web content to the server
   # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/git_module.html
   ansible.builtin.git:
@@ -40,11 +31,6 @@
     state: link
   notify: Restart httpd
   become: true
-
-- name: Set the perms on the home folder so the read is allowed
-  ansible.builtin.file:
-    path: /home/almalinux
-    mode: '755'
 
 - name: Tell SELinux that the linked folder is A-OK
   ansible.builtin.command: chcon -R -t httpd_sys_content_t /var/www/html/research/
