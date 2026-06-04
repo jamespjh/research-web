@@ -7,7 +7,7 @@ layout: default
 
 This page contents links to the research work of James Hetherington
 
-## Contents
+## Contents
 
 * [Profile](https://profiles.ucl.ac.uk/6295-james-hetherington)
 * [Inaugural Lecture](inaugural)
