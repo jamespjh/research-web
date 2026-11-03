@@ -24,16 +24,19 @@
       bundle install
       bundle exec jekyll build
 
-- name: Repoint the symlink to the latest clone
-  ansible.builtin.file:
-    src: /home/almalinux/builds/{{ clone.after }}/_site
-    dest: /var/www/html/research
-    state: link
-  notify: Restart httpd
+- name: Copy the built site to a folder named for the sha under /var/www
+  # Under /var/www the files get SELinux's httpd_sys_content_t label by default, so no chcon is needed
+  ansible.builtin.copy:
+    remote_src: true
+    src: /home/almalinux/builds/{{ clone.after }}/_site/
+    dest: /var/www/builds/research/{{ clone.after }}/
   become: true
 
-- name: Tell SELinux that the linked folder is A-OK
-  ansible.builtin.command: chcon -R -t httpd_sys_content_t /var/www/html/research/
+- name: Repoint the symlink to the latest build
+  ansible.builtin.file:
+    src: /var/www/builds/research/{{ clone.after }}
+    dest: /var/www/html/research
+    state: link
   become: true
 
 - name: Set up the apache config
@@ -42,7 +45,3 @@
     src: web.conf
     dest: /etc/httpd/conf.d/web.conf
   notify: Restart httpd
-
-
-
-
