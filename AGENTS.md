@@ -6,8 +6,8 @@ This is the Jekyll source for https://research.jh.arc.ucl.ac.uk (theme `UCL-ARC/
 
 1. Push to `main` runs `.github/workflows/build_site.yml`: a Jekyll build on GitHub-hosted runners. This only checks the site builds; its artifact is not what gets served.
 2. On success, `.github/workflows/deploy.yml` dispatches `deploy_web.yml` in `jh-infrastructure`, using the `INFRA` secret (a fine-grained PAT).
-3. `deploy_web.yml` runs on the self-hosted `condenser` runner (the bootstrap VM). It checks out both repos and runs this repo's `ansible/web.yml` against `jh-infrastructure`'s inventory (`-i ../../ansible/inventory`).
-4. This repo's `ansible/roles/web` role, on the `web` VM: clones this repo into `~/builds/<sha>`, builds it there with rbenv using the Ruby version in `.ruby-version`, repoints `/var/www/html/research` at the new `_site`, and installs the Apache vhost (`files/web.conf`).
+3. `deploy_web.yml` runs on the self-hosted runner labelled `bootstrap` (the bootstrap VM). It checks out both repos and runs this repo's `ansible/web.yml` against `jh-infrastructure`'s Condenser inventory (`-i ../../ansible/inventory/sl-p02-kubevirt.yml`), failing if the inventory won't load.
+4. This repo's `ansible/roles/web` role, on the `web` VM: clones this repo into `~/builds/<sha>`, builds it there with rbenv using the Ruby version in `.ruby-version`, copies `_site` to `/var/www/builds/research/<sha>/` (where SELinux labels it for Apache by default), repoints `/var/www/html/research` at that copy, and installs the Apache vhost (`files/web.conf`).
 5. `deploy_tests/test_web.py` fetches the live site and checks for the `Introduction` heading.
 
 So `.ruby-version` and `Gemfile` changes take effect on the server, not just in CI.
