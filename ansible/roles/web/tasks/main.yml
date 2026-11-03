@@ -14,7 +14,7 @@
     dest: builds/{{ clone.after }}
 
 - name: Build the site
-  # Need to make this idempotent
+  # Not idempotent: rebuilds every run, even if this sha was already built
   ansible.builtin.shell:
     chdir: builds/{{ clone.after }}
     cmd: |
