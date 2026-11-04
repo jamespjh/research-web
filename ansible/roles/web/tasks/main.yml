@@ -25,11 +25,18 @@
       bundle exec jekyll build
 
 - name: Copy the built site to a folder named for the sha under /var/www
-  # Under /var/www the files get SELinux's httpd_sys_content_t label by default, so no chcon is needed
   ansible.builtin.copy:
     remote_src: true
     src: /home/almalinux/builds/{{ clone.after }}/_site/
     dest: /var/www/builds/research/{{ clone.after }}/
+  become: true
+  register: site_copy
+
+- name: Give the copied files the SELinux label Apache can read
+  # A remote_src copy keeps each file's user_home_t label from the build folder, and Apache
+  # is then refused (403) on everything but the folders; restorecon applies /var/www's default
+  ansible.builtin.command: restorecon -R /var/www/builds/research/{{ clone.after }}
+  when: site_copy.changed
   become: true
 
 - name: Repoint the symlink to the latest build
